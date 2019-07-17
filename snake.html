@@ -83,27 +83,53 @@
                     super(x, y, color);
                     this.d = direction;
                 }
+                moveUp()   {
 
-                moveUp(){    this.y -= 14; }
-                moveLeft(){  this.x += 14; }
-                moveRight(){ this.x -= 14; }
-                moveDown(){  this.y += 14; }
+
+                    this.y -= 14;
+
+                    if ( this.y <= 0 ) { this.y = height; }
+                }
+
+                moveLeft() {
+                    this.x += 14;
+                    if ( this.x > width ) { this.x = 0; }
+                }
+
+                moveRight(){
+                    this.x -= 14;
+                    if ( this.x <= 0 ) { this.x = width; }
+
+                 }
+                moveDown() {
+                    this.y += 14;
+                    if ( this.y > height ) { this.y = 0; }
+                }
                 collisionWall() {
+                    collisionWall:
                     for (var j = 0; j < walls.length; ++j){
                         for(var k = 0; k < walls[j].bricks.length; ++k){
                             var dx = Math.abs(this.x - walls[j].bricks[k].x);
                             var dy = Math.abs(this.y - walls[j].bricks[k].y);
+
                             var dxy = Math.sqrt( dx * dx + dy * dy );
                             var lx = (this.size + walls[j].bricks[k].size)/2;
                             var ly = (this.size + walls[j].bricks[k].size)/2;
                             var lxy = Math.sqrt( lx * lx + ly * ly );
-                            if ( dxy < lxy ) { // Действие при столкноверии двух объектов Spine Wall[j]
-                                snake.backwards(); //alert("Добрый день!!!");
+                            var make = false;
 
+                            if ( dxy < lxy ) { // Действие при столкноверии двух объектов Spine Wall[j]
+                                //snake.backwards();
+                                //alert("Добрый день!!!");
+                                make = true;
+                                break collisionWall;
                             }
                         }
-
                     }
+                    if ( make == false ) {
+                        snake.move();
+                    }
+                    
                 }
 
 
@@ -229,28 +255,32 @@
 
                         else if ( keyCode == 39 ) { _this.tek = 1; }
                         else if ( keyCode == 37 ) { _this.tek = 2; }
-                        _this.move();
+                        _this.collisionWall(); //_this.move();
                     });
                 }
 
                 move(){
-                    for (var i = 0; i < this.sections.length; ++i){ 
 
-                        var pre = this.sections[i].d;
-                        this.sections[i].d = this.tek;
-                        if      ( this.sections[i].d == 0 ) { this.sections[i].moveUp();    }
-                        else if ( this.sections[i].d == 1 ) { this.sections[i].moveLeft();  }
-                        else if ( this.sections[i].d == 2 ) { this.sections[i].moveRight(); }
-                        else if ( this.sections[i].d == 3 ) { this.sections[i].moveDown();  }
-                        this.tek = pre;
-
-                        //console.log('Добрый вечер!!!');
-                    }
-                    // for (var i = 0; i < this.sections.length; ++i){ console.log('Good morning!!!' + i + ' ' + this.sections[i].x + ' ' + this.sections[i].y + ' ' + this.sections[i].d); }
+                
+                    //if ( this.collisionWall() == false ) {
+                        for (var i = 0; i < this.sections.length; ++i){ 
+                            var pre = this.sections[i].d;
+                            this.sections[i].d = this.tek;
+                            if      ( this.sections[i].d == 0 ) { this.sections[i].moveUp();    }
+                            else if ( this.sections[i].d == 1 ) { this.sections[i].moveLeft();  }
+                            else if ( this.sections[i].d == 2 ) { this.sections[i].moveRight(); }
+                            else if ( this.sections[i].d == 3 ) { this.sections[i].moveDown();  }
+                            this.tek = pre;
+                            //console.log('Добрый вечер!!!');
+                        }
+                        // for (var i = 0; i < this.sections.length; ++i){ console.log('Good morning!!!' + i + ' ' + this.sections[i].x + ' ' + this.sections[i].y + ' ' + this.sections[i].d); }
+                    //}
                 }
 
                 collisionWall(){
-                    this.sections[0].collisionWall();
+                    
+                    //alert('Добрый вечер!!!' + ' ' + 
+                    this.sections[0].collisionWall();//);
                 }
 
                 collisionFood(){
@@ -403,15 +433,26 @@
             // Строительство огорода
             var walls = [];
             
-            var wall1 = new Wall(0, 0, 'h', width);
-                walls.push(wall1);
-            var wall2 = new Wall(0, 0, 'v', height);
-                walls.push(wall2);
-            var wall3 = new Wall((width - 10), 0, 'v', height);
-                walls.push(wall3);
-            var wall4 = new Wall(0, (height -  10), 'h', width);
-                walls.push(wall4);
+            var wall1 = new Wall(0, 0, 'h', (width/2 - 35));
+            walls.push(wall1);
+            var wall7 = new Wall((width/2 + 35), 0, 'h', width);
 
+            walls.push(wall7);
+            var wall2 = new Wall(0, 0, 'v', (height/2 - 35));
+            walls.push(wall2);
+            var wall5 = new Wall(0, (height/2 + 35), 'v', height);
+
+            walls.push(wall5);
+            var wall3 = new Wall((width - 10), 0, 'v', (height/2 - 35));
+            walls.push(wall3);
+
+            var wall6 = new Wall((width - 10 ), (height/2 + 35), 'v', height);
+            walls.push(wall6);
+            var wall4 = new Wall(0, (height -  10), 'h', (width/2 - 35));
+            walls.push(wall4);
+
+            var wall8 = new Wall((width/2 + 35), (height - 10), 'h', width);
+            walls.push(wall8);
             var foods = [];
             while (foods.length < foodsnumber ){
                 var food = new Food( random(14, (width - 14)), random(14, (height - 14)) );
@@ -457,9 +498,9 @@
                 }
 
                 // Змейка
-
                 snake.draw();
-                snake.collisionWall();
+                //snake.collisionWall();
+
                 snake.collisionFood();
 
                 snake.collisionPoison();
